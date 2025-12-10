@@ -1,0 +1,15 @@
+{% extends 'dashboard.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{url_for('static',filename='addnotes.css')}}">
+{% endblock %}
+
+  <!-- ===== MAIN CONTENT ===== -->
+  
+      {% block content %}
+      <h1>Viwe Notes</h1>
+      <p>Title and description saved notes</p>
+      <form class="note-form">
+        <input class="note-form" type="text" name="title" value="{{notes_data[1]}}" placeholder="Note Title" required>
+        <textarea class="note-form" name="description" readonly>{{notes_data[2]}}</textarea>
+      </form>
+      {% endblock %}
