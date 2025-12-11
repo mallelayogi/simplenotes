@@ -232,7 +232,7 @@ def deletenotes(nid):
         return redirect(url_for('login'))
 
 
-@app.route('/updatenotes/<nid>')    
+@app.route('/updatenotes/<nid>',methods=['GET','POST'])    
 def updatenotes(nid):
     if session.get('user'):
         try:
@@ -271,7 +271,7 @@ def updatenotes(nid):
                     return redirect(url_for('updatenotes',nid=nid))
                 else:
                     flash('Notes Updated Successfully')
-                    return (redirect('viewnotes',nid=nid))
+                    return redirect(url_for('viewnotes',nid=nid))
  
             return render_template('updatenotes.html',notes_data=notes_data)
     else:
@@ -367,15 +367,15 @@ def viewallfiles():
         return redirect(url_for('login'))
 
 
-@app.route('/viewfile/<fileid>')
-def viewfile(fileid):
+@app.route('/viewfile/<fid>')
+def viewfile(fid):
     if session.get('user'):
         try:
             cursor = mydb.cursor(buffered=True)
             cursor.execute('select userid from user where usermail=%s',[session.get('user')])
             user_id = cursor.fetchone()
             if user_id:
-                cursor.execute('select fileid,file_name,file_content from filesdata where added_by=%s and fileid=%s',[user_id[0],fileid])
+                cursor.execute('select fileid,file_name,file_content from filesdata where added_by=%s and fileid=%s',[user_id[0],fid])
                 file_data = cursor.fetchone()
                 cursor.close()
             else:
@@ -401,7 +401,7 @@ def downloadfile(fid):
             cursor.execute('select userid from user where usermail=%s',[session.get('user')])
             user_id = cursor.fetchone()
             if user_id:
-                cursor.execute('select fid,file_name,file_content from filesdata where added_by=%s and fid=%s',[user_id[0],fid])
+                cursor.execute('select fileid,file_name,file_content from filesdata where added_by=%s and fileid=%s',[user_id[0],fid])
                 file_data = cursor.fetchone()
                 cursor.close()
             else:
@@ -419,6 +419,30 @@ def downloadfile(fid):
         flash('Please login')
         return redirect(url_for('login'))
 
+@app.route('/deletefile/<fid>')
+def deletefile(fid):
+   if session.get('user'):
+      try:
+         cursor=mydb.cursor(buffered=True)
+         cursor.execute('select userid from user where usermail=%s',[session.get('user')])
+         user_id=cursor.fetchone()
+         if user_id:
+            cursor.execute('delete from filesdata where added_by=%s and fileid=%s',[user_id[0],fid])
+            mydb.commit()
+            cursor.close()
+         else:
+            flash('could not get the user data to fetch  file')
+            return redirect(url_for('dashboard'))
+      except Exception as e:
+         print(e)
+         flash('DB connection error')
+         return redirect(url_for('dashboard'))
+      else:
+         flash('Notes Deleted Successfully')
+         return redirect(url_for('viewallfiles'))
+   else:
+      flash('please login first')
+      return redirect(url_for('login'))
 
 @app.route('/search',methods=['POST'])
 def search():
